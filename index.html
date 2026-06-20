@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Special Surprise ✨</title>
+    <style>
+        :root {
+            --bg-pastel: #fff5f7;
+            --pink-primary: #ffb7c5;
+            --pink-dark: #ff8da1;
+            --lavender: #e8dbfc;
+            --lavender-dark: #bca0dc;
+            --text-color: #5c4a52;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-pastel);
+            color: var(--text-color);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bg-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bg-heart {
+            position: absolute;
+            color: rgba(255, 183, 197, 0.4);
+            animation: floatUp 6s linear infinite;
+            font-size: 1.5rem;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(105vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(20px);
+            z-index: 2;
+        }
+
+        .screen.active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: translateY(0) !important;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem 1.5rem;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(255, 141, 161, 0.15);
+            width: 100%;
+            max-width: 340px;
+            border: 3px solid var(--lavender);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: #7d6871;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+            color: white;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 141, 161, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+            text-decoration: none;
+            position: relative;
+            z-index: 20;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(255, 141, 161, 0.3);
+        }
+
+        .btn-no {
+            background: #f0ede6;
+            color: #8a8285;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: left 0.15s ease, top 0.15s ease, transform 0.2s;
+        }
+
+        .game-canvas-container, #game-canvas-container {
+            width: 100%;
+            height: 65vh;
+            background: linear-gradient(to bottom, #ffffff, #fff0f3);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 2px dashed var(--pink-primary);
+            margin-bottom: 1rem;
+            touch-action: none;
+        }
+
+        #basket {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            width: 65px;
+            height: 35px;
+            background: var(--lavender-dark);
+            border-radius: 0 0 15px 15px;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        #basket::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            width: 75px;
+            height: 8px;
+            background: #a685cd;
+            border-radius: 4px;
+        }
+
+        .falling-heart {
+            position: absolute;
+            font-size: 1.8rem;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .game-ui {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-board {
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            border: 2px solid var(--pink-primary);
+        }
+
+        #game-status-msg {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--pink-dark);
+            min-height: 1.4rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            width: 100%;
+        }
+
+        .quiz-btn {
+            background: white;
+            color: var(--text-color);
+            border: 2px solid var(--lavender);
+            padding: 1rem;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quiz-btn:active, .quiz-btn.selected {
+            background: var(--lavender);
+            border-color: var(--lavender-dark);
+            transform: scale(0.98);
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 16px;
+            background: linear-gradient(90deg, var(--pink-primary), var(--lavender-dark));
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        .msg-line {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            margin-bottom: 1.2rem;
+            display: block;
+        }
+
+        .msg-line.reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .final-buttons {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .pulse {
+            animation: pulse-anim 1.5s infinite;
+        }
+
+        @keyframes pulse-anim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            z-index: 10;
+            opacity: 0;
+            animation: confettiFall 3s ease-out infinite;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-5vh) translateX(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) translateX(50px) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles" id="bgParticles"></div>
+    
+    <!-- Changed to a robust, publicly accessible cloud hosting link optimized for streaming -->
+    <audio id="message-bg-music" src="https://raw.githubusercontent.com/Z-Khanna/cdn/main/magnolia_chorus.mp3" preload="auto" loop></audio>
+
+    <div class="screen active" id="screen-welcome">
+        <div class="card">
+            <div style="font-size: 3.5rem; margin-bottom: 1rem;">✨</div>
+            <h1>Hi, Ms.!</h1>
+            <p>This will only take a few minutes.</p>
+            <button class="btn pulse" onclick="unlockAudioTrack(); navigateTo('screen-game', initGame)">Start</button>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-game">
+        <div class="game-ui">
+            <div class="score-board">Hearts Collected: <span id="score-val">0</span>/10</div>
+            <div id="game-status-msg">Get ready!</div>
+        </div>
+        <div id="game-canvas-container">
+            <div id="basket">🧺</div>
+        </div>
+        <p style="font-size: 0.9rem; margin: 0;">Drag or tap anywhere to move the basket left and right!</p>
+    </div>
+
+    <div class="screen" id="screen-quiz">
+        <div class="card">
+            <p id="quiz-progress" style="font-size: 0.85rem; color: var(--lavender-dark); font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase;">Question 1 of 5</p>
+            <h2 id="quiz-question" style="margin-bottom: 1.5rem; font-size: 1.4rem;">Coffee or Milk tea?</h2>
+            <div class="quiz-options">
+                <button class="quiz-btn" id="opt-1" onclick="handleQuizAnswer(1)">Option 1</button>
+                <button class="quiz-btn" id="opt-2" onclick="handleQuizAnswer(2)">Option 2</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-analysis">
+        <div class="card">
+            <div style="font-size: 3rem; margin-bottom: 1rem;" id="analysis-icon">⚙️</div>
+            <h2 id="analysis-status" style="font-size: 1.3rem;">Analyzing responses...</h2>
+            <div class="progress-container">
+                <div class="progress-bar" id="load-bar"></div>
+            </div>
+            <p id="analysis-percent" style="font-weight: bold; color: var(--pink-dark);">0%</p>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-message">
+        <div class="card" style="max-width: 400px; text-align: left; max-height: 80vh; overflow-y: auto;">
+            <span class="msg-line" id="msg-1">Hi, Angelica. I know medjo cringy and weird itong ginawa kong webpage HAHAHA</span>
+            <span class="msg-line" id="msg-2">I just want to say that I'm intereted to you, I know this may shock you a little but I just want you to know that I think I'm into you.</span>
+            <span class="msg-line" id="msg-3">If you're dating someone right now, just let me know. And if you're not, that's okay too, just be honest with me. If you don't feel the same way about me, you can tell me directly, and I'll respect that completely.</span>
+            <span class="msg-line" id="msg-4">If you're still unsure because this confession came out of nowhere, that's okay as well. Take all the time you need to figure out how you feel. I'm willing to wait for your answer, no matter how long it takes.</span>
+            <span class="msg-line" id="msg-5">This isn't meant to pressure you into making a sudden decision, nor am I expecting an answer right away. You don't have to tell me that you like me back. I made this confession not because I expect anything in return, but because I wanted to be honest with myself and finally let go of the weight of keeping these feelings to myself. </span>
+             <span class="msg-line" id="msg-6">There's no pressure at all, I simply hope for the chance to spend time with you and learn more about who you are. If something meaningful comes from it, I'd be grateful. And if not, I'd still be happy to have had the opportunity to know you.</span>
+            <span class="msg-line" id="msg-7" style="font-weight: bold; color: var(--pink-dark);">And with that, I wanted to ask you something.</span>
+            <div style="text-align: center; margin-top: 1.5rem;" class="msg-line" id="msg-btn">
+                <button class="btn" onclick="navigateTo('screen-final', startCelebration)">Next </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-final">
+        <div class="card" id="final-card">
+            <div style="font-size: 3.5rem; margin-bottom: 1rem; animation: pulse-anim 1s infinite">💌</div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Can we go out sometime?hehehe 💪😊</h2>
+            <div class="final-buttons">
+                <button class="btn" onclick="acceptProposal()">Yes ❤️</button>
+                <button class="btn btn-no" id="no-button" onmouseover="dodgeNoButton(event)" ontouchend="dodgeNoButton(event)">No 🤔</button>
+            </div>
+        </div>
+        
+        <div class="card" id="celebration-card" style="display: none; transform: scale(0.9); transition: transform 0.4s ease;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🥳🎉</div>
+            <h2 style="color: var(--pink-dark); margin-bottom: 1rem;">Yay! Sabi kona ehh (de joklang) 💖</h2>
+            <p style="margin-bottom: 0; font-weight: 500;">AHAHAHAHAHAHAHAH See you! </p>
+        </div>
+    </div>
+
+    <script>
+        function createBackgroundHearts() {
+            const container = document.getElementById('bgParticles');
+            const heartTypes = ['🌸', '❤️', '✨', '💖', '☁️'];
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('bg-heart');
+                heart.innerText = heartTypes[Math.floor(Math.random() * heartTypes.length)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDelay = Math.random() * 6 + 's';
+                heart.style.fontSize = (Math.random() * 1 + 1) + 'rem';
+                container.appendChild(heart);
+            }
+        }
+        createBackgroundHearts();
+
+        function navigateTo(screenId, callback) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            target.classList.add('active');
+            if (callback) callback();
+        }
+
+        function unlockAudioTrack() {
+            const audio = document.getElementById('message-bg-music');
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(err => {
+                console.log("Pre-activation log:", err);
+            });
+        }
+
+        let gameActive = false;
+        let score = 0;
+        let gameLoopId, heartSpawnId;
+        const container = document.getElementById('game-canvas-container');
+        const basket = document.getElementById('basket');
+        const scoreVal = document.getElementById('score-val');
+        const statusMsg = document.getElementById('game-status-msg');
+
+        const encouragement = ["Nice catch! ", "Awesome! ", "Keep it up! ", "Perfect! ", "So close to winning! "];
+
+        function initGame() {
+            gameActive = true;
+            score = 0;
+            scoreVal.innerText = score;
+            statusMsg.innerText = "Catch 10 falling hearts!";
+            
+            container.addEventListener('touchmove', handleMove, { passive: false });
+            container.addEventListener('mousemove', handleMove);
+
+            gameLoopId = requestAnimationFrame(updateGame);
+            heartSpawnId = setInterval(spawnHeart, 900);
+        }
+
+        function handleMove(e) {
+            if (!gameActive) return;
+            e.preventDefault();
+            const rect = container.getBoundingClientRect();
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let relativeX = clientX - rect.left;
+            
+            if (relativeX < 35) relativeX = 35;
+            if (relativeX > rect.width - 35) relativeX = rect.width - 35;
+            
+            basket.style.left = relativeX + 'px';
+        }
+
+        function spawnHeart() {
+            if (!gameActive) return;
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            heart.innerText = '❤️';
+            heart.style.left = Math.random() * (container.clientWidth - 40) + 20 + 'px';
+            heart.style.top = '-40px';
+            container.appendChild(heart);
+        }
+
+        function updateGame() {
+            if (!gameActive) return;
+            const hearts = document.querySelectorAll('.falling-heart');
+            const basketRect = basket.getBoundingClientRect();
+
+            hearts.forEach(heart => {
+                let top = parseFloat(heart.style.top) || 0;
+                top += 4.5;
+                heart.style.top = top + 'px';
+
+                const heartRect = heart.getBoundingClientRect();
+                if (
+                    heartRect.bottom >= basketRect.top &&
+                    heartRect.top <= basketRect.bottom &&
+                    heartRect.right >= basketRect.left &&
+                    heartRect.left <= basketRect.right
+                ) {
+                    heart.remove();
+                    score++;
+                    scoreVal.innerText = score;
+                    
+                    if (score >= 10) {
+                        endGame(true);
+                    } else {
+                        statusMsg.innerText = encouragement[Math.floor(Math.random() * encouragement.length)];
+                    }
+                }
+
+                if (top > container.clientHeight) {
+                    heart.remove();
+                }
+            });
+
+            if (gameActive) gameLoopId = requestAnimationFrame(updateGame);
+        }
+
+        function endGame(isWin) {
+            gameActive = false;
+            clearInterval(heartSpawnId);
+            cancelAnimationFrame(gameLoopId);
+            document.querySelectorAll('.falling-heart').forEach(h => h.remove());
+
+            if (isWin) {
+                statusMsg.innerText = "You Win! 🎉 Moving on...";
+                setTimeout(() => {
+                    navigateTo('screen-quiz', initQuiz);
+                }, 1500);
+            }
+        }
+
+        const quizData = [
+            { q: "Coffee or Milk tea? ☕🧋", a: "Coffee", b: "Milk Tea" },
+            { q: "Beach or Mountains? 🏖️🏔️", a: "Beach", b: "Mountains" },
+            { q: "Sunrise or Sunset? 🌅🌇", a: "Sunrise", b: "Sunset" },
+            { q: "Sweet or Savory food? 🍫🍟", a: "Sweet", b: "Savory" },
+            { q: "Movies or Books? 🎬📚", a: "Movies", b: "Books" }
+        ];
+        let currentQuestionIdx = 0;
+
+        function initQuiz() {
+            currentQuestionIdx = 0;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const data = quizData[currentQuestionIdx];
+            document.getElementById('quiz-progress').innerText = `Question ${currentQuestionIdx + 1} of 5`;
+            document.getElementById('quiz-question').innerText = data.q;
+            document.getElementById('opt-1').innerText = data.a;
+            document.getElementById('opt-2').innerText = data.b;
+        }
+
+        function handleQuizAnswer(selection) {
+            currentQuestionIdx++;
+            if (currentQuestionIdx < quizData.length) {
+                const card = document.querySelector('#screen-quiz .card');
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    showQuestion();
+                    card.style.transform = 'scale(1)';
+                }, 200);
+            } else {
+                navigateTo('screen-analysis', runAnalysis);
+            }
+        }
+
+        const analysisPhrases = [
+            "Analyzing responses... ",
+            "Checking compatibility... ",
+            "Saving response to database... ",
+            "Calculating probability... "
+        ];
+
+        function runAnalysis() {
+            let progress = 0;
+            const bar = document.getElementById('load-bar');
+            const percentText = document.getElementById('analysis-percent');
+            const phraseText = document.getElementById('analysis-status');
+            const icon = document.getElementById('analysis-icon');
+
+            const interval = setInterval(() => {
+                progress += 1;
+                bar.style.width = progress + '%';
+                percentText.innerText = progress + '%';
+
+                if (progress === 25) phraseText.innerText = analysisPhrases[1];
+                if (progress === 55) phraseText.innerText = analysisPhrases[2];
+                if (progress === 80) phraseText.innerText = analysisPhrases[3];
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    phraseText.innerText = "Compatibility Score: 99.9% 💖";
+                    icon.innerText = "💝";
+                    triggerConfetti(25);
+                    
+                    setTimeout(() => {
+                        navigateTo('screen-message', runMessageReveal);
+                    }, 2000);
+                }
+            }, 40);
+        }
+
+        function runMessageReveal() {
+            document.getElementById('message-bg-music').play().catch(err => {
+                console.log("Audio process diagnostic fallback log:", err);
+            });
+
+            const lines = ['msg-1', 'msg-2', 'msg-3', 'msg-4', 'msg-5', 'msg-6', 'msg-7', 'msg-btn'];
+            lines.forEach((id, idx) => {
+                setTimeout(() => {
+                    document.getElementById(id).classList.add('reveal');
+                }, idx * 1600);
+            });
+        }
+
+        function startCelebration() {}
+
+        function dodgeNoButton(e) {
+            if (e) e.preventDefault();
+            const noBtn = document.getElementById('no-button');
+            noBtn.style.position = 'fixed';
+            
+            const padding = 60;
+            const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+            const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+            
+            const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+            
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        function acceptProposal() {
+            document.getElementById('final-card').style.display = 'none';
+            document.getElementById('no-button').style.display = 'none';
+            
+            const celebCard = document.getElementById('celebration-card');
+            celebCard.style.display = 'block';
+            
+            setTimeout(() => {
+                celebCard.style.transform = 'scale(1)';
+            }, 50);
+
+            setInterval(() => {
+                triggerConfetti(15);
+            }, 800);
+        }
+
+        function triggerConfetti(count) {
+            const colors = ['#ffb7c5', '#ff8da1', '#e8dbfc', '#bca0dc', '#fffbca'];
+            for (let i = 0; i < count; i++) {
+                const conf = document.createElement('div');
+                conf.classList.add('confetti');
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.animationDelay = Math.random() * 0.5 + 's';
+                conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0px';
+                conf.style.transform = `scale(${Math.random() * 0.6 + 0.6})`;
+                document.body.appendChild(conf);
+
+                setTimeout(() => conf.remove(), 3000);
+            }
+        }
+    </script>
+</body>
+</html>

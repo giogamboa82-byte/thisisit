@@ -297,7 +297,6 @@
 <body>
 
     <div class="bg-particles" id="bgParticles"></div>
-    
     <audio id="message-bg-music" src="music.mp3" loop></audio>
 
     <div class="screen active" id="screen-welcome">
@@ -398,10 +397,7 @@
         }
 
         function startMusicAndNavigate() {
-            const audio = document.getElementById('message-bg-music');
-            audio.play().catch(err => {
-                console.log("Audio playback forced override active:", err);
-            });
+            // Music no longer triggers immediately here
             navigateTo('screen-game', initGame);
         }
 
@@ -574,6 +570,12 @@
         }
 
         function runMessageReveal() {
+            // Music starts exactly when this letter screen displays
+            const audio = document.getElementById('message-bg-music');
+            audio.play().catch(err => {
+                console.log("Audio playback delayed or blocked:", err);
+            });
+
             const lines = ['msg-1', 'msg-2', 'msg-3', 'msg-4', 'msg-5', 'msg-6', 'msg-7', 'msg-btn'];
             lines.forEach((id, idx) => {
                 setTimeout(() => {

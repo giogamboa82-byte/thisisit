@@ -298,15 +298,14 @@
 
     <div class="bg-particles" id="bgParticles"></div>
     
-    <!-- Changed to a robust, publicly accessible cloud hosting link optimized for streaming -->
-    <audio id="message-bg-music" src="https://raw.githubusercontent.com/Z-Khanna/cdn/main/magnolia_chorus.mp3" preload="auto" loop></audio>
+    <audio id="message-bg-music" src="music.mp3" loop></audio>
 
     <div class="screen active" id="screen-welcome">
         <div class="card">
             <div style="font-size: 3.5rem; margin-bottom: 1rem;">✨</div>
             <h1>Hi, Ms.!</h1>
             <p>This will only take a few minutes.</p>
-            <button class="btn pulse" onclick="unlockAudioTrack(); navigateTo('screen-game', initGame)">Start</button>
+            <button class="btn pulse" onclick="startMusicAndNavigate()">Start</button>
         </div>
     </div>
 
@@ -398,14 +397,12 @@
             if (callback) callback();
         }
 
-        function unlockAudioTrack() {
+        function startMusicAndNavigate() {
             const audio = document.getElementById('message-bg-music');
-            audio.play().then(() => {
-                audio.pause();
-                audio.currentTime = 0;
-            }).catch(err => {
-                console.log("Pre-activation log:", err);
+            audio.play().catch(err => {
+                console.log("Audio playback forced override active:", err);
             });
+            navigateTo('screen-game', initGame);
         }
 
         let gameActive = false;
@@ -577,10 +574,6 @@
         }
 
         function runMessageReveal() {
-            document.getElementById('message-bg-music').play().catch(err => {
-                console.log("Audio process diagnostic fallback log:", err);
-            });
-
             const lines = ['msg-1', 'msg-2', 'msg-3', 'msg-4', 'msg-5', 'msg-6', 'msg-7', 'msg-btn'];
             lines.forEach((id, idx) => {
                 setTimeout(() => {

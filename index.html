@@ -397,7 +397,6 @@
         }
 
         function startMusicAndNavigate() {
-            // Music no longer triggers immediately here
             navigateTo('screen-game', initGame);
         }
 
@@ -570,16 +569,18 @@
         }
 
         function runMessageReveal() {
-            // Music starts exactly when this letter screen displays
-            const audio = document.getElementById('message-bg-music');
-            audio.play().catch(err => {
-                console.log("Audio playback delayed or blocked:", err);
-            });
-
             const lines = ['msg-1', 'msg-2', 'msg-3', 'msg-4', 'msg-5', 'msg-6', 'msg-7', 'msg-btn'];
             lines.forEach((id, idx) => {
                 setTimeout(() => {
                     document.getElementById(id).classList.add('reveal');
+                    
+                    // Plays exactly when the very first line "msg-1" appears!
+                    if (id === 'msg-1') {
+                        const audio = document.getElementById('message-bg-music');
+                        audio.play().catch(err => {
+                            console.log("Audio playback delayed:", err);
+                        });
+                    }
                 }, idx * 1600);
             });
         }

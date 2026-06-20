@@ -337,13 +337,15 @@
             <div class="progress-container">
                 <div class="progress-bar" id="load-bar"></div>
             </div>
-            <p id="analysis-percent" style="font-weight: bold; color: var(--pink-dark);">0%</p>
+            <p id="analysis-percent" style="font-weight: bold; color: var(--pink-dark); margin-bottom: 1rem;">0%</p>
+            <!-- Hidden Next Button until 100% loaded -->
+            <button class="btn pulse" id="analysis-next-btn" style="display: none; width: 100%;" onclick="playMusicAndShowMessage()">See Results ✨</button>
         </div>
     </div>
 
     <div class="screen" id="screen-message">
         <div class="card" style="max-width: 400px; text-align: left; max-height: 80vh; overflow-y: auto;">
-            <span class="msg-line" id="msg-1">Hi, Angelica. I know medjo cringy and weird itong ginawa kong website (literally website 'to) na I published on github HAHAHA</span>
+            <span class="msg-line" id="msg-1">Hi, Angelica. I know medjo cringy and weird itong ginawa kong website (literally website 'to), I published it on GitHub HAHAHA.</span>
             <span class="msg-line" id="msg-2">I just want to say that I'm intereted to you, I know this may shock you a little but I just want you to know that I think I'm into you.</span>
             <span class="msg-line" id="msg-3">If you're dating someone right now, just let me know. And if you're not, that's okay too, just be honest with me. If you don't feel the same way about me, you can tell me directly, and I'll respect that completely.</span>
             <span class="msg-line" id="msg-4">If you're still unsure because this confession came out of nowhere, that's okay as well. Take all the time you need to figure out how you feel. I'm willing to wait for your answer, no matter how long it takes.</span>
@@ -397,15 +399,6 @@
         }
 
         function startMusicAndNavigate() {
-            // Trick mobile devices: Start the track muted on the initial user interaction gesture
-            const audio = document.getElementById('message-bg-music');
-            audio.volume = 0; 
-            audio.play().then(() => {
-                console.log("Audio unlocked successfully on mobile.");
-            }).catch(err => {
-                console.log("Unlock failed:", err);
-            });
-
             navigateTo('screen-game', initGame);
         }
 
@@ -554,6 +547,10 @@
             const percentText = document.getElementById('analysis-percent');
             const phraseText = document.getElementById('analysis-status');
             const icon = document.getElementById('analysis-icon');
+            const nextBtn = document.getElementById('analysis-next-btn');
+
+            // Hide button initially in case of replays
+            nextBtn.style.display = 'none';
 
             const interval = setInterval(() => {
                 progress += 1;
@@ -570,11 +567,20 @@
                     icon.innerText = "💝";
                     triggerConfetti(25);
                     
+                    // Reveal the magical button instead of auto-navigating!
                     setTimeout(() => {
-                        navigateTo('screen-message', runMessageReveal);
-                    }, 2000);
+                        nextBtn.style.display = 'block';
+                    }, 500);
                 }
-            }, 40);
+            }, 35);
+        }
+
+        function playMusicAndShowMessage() {
+            // User click interaction allows audio to play beautifully on ALL phones
+            const audio = document.getElementById('message-bg-music');
+            audio.play().catch(err => console.log("Audio play error:", err));
+
+            navigateTo('screen-message', runMessageReveal);
         }
 
         function runMessageReveal() {
@@ -582,12 +588,6 @@
             lines.forEach((id, idx) => {
                 setTimeout(() => {
                     document.getElementById(id).classList.add('reveal');
-                    
-                    // The magic trick: Unmute the already playing music exactly as 'msg-1' shows up!
-                    if (id === 'msg-1') {
-                        const audio = document.getElementById('message-bg-music');
-                        audio.volume = 1.0; 
-                    }
                 }, idx * 1600);
             });
         }
